@@ -175,6 +175,24 @@ HomeSpan's CLI in the serial monitor (`?` lists everything):
 | Temperature high right after boot | Normal; it settles within a few minutes. |
 | Temperature/humidity wrong after settling | Re-tune the [temperature offset](#temperature-offset). |
 | SCD40 errors in the log | Check wiring (SDA 21, SCL 22, 3V3, GND). |
+| Wi-Fi name becomes `Apple HomeKit for the Espressif`, or pairing disappears | Power the board through its USB-serial port; see below. |
+
+### Power the board through its USB-serial port
+
+Power the ESP32 through the USB port wired to its USB-serial chip (a phone
+charger is fine), not through a power-only port such as a USB-C socket on a
+carrier/expansion board or the 5V pin.
+
+On many boards the USB-serial chip is powered only from its own USB port. When
+it's unpowered, the ESP32's serial RX pin floats and HomeSpan reads phantom
+input from it ([HomeSpan docs](https://github.com/HomeSpan/HomeSpan/blob/master/docs/Solutions.md)).
+Here that input was the ESP32's own boot output, which HomeSpan ran as CLI
+commands: `Welcome to HomeSpan!` → `W` (the next line became the Wi-Fi name),
+`HomeSpan Version…` → `H` (pairing deleted).
+
+If you must use another power input, add a 10 kΩ pull-up from RX0 (GPIO3) to
+3.3V, or call `homeSpan.setSerialInputDisable(true)` (this disables the serial
+CLI).
 
 ## Project layout
 
